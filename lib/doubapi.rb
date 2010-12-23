@@ -1,0 +1,3 @@
+module Doubapi
+  # Your code goes here...
+end
