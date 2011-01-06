@@ -66,13 +66,17 @@ def self.compare_date a , b
 	return true if (ya.to_i * 12 + ma.to_i ) >= (yb.to_i*12+mb.to_i)
 end
 
-def self.search_album_of artist , after_date = "1900.01"
+def self.search_albums_of artist , after_date = "1900.01"
 	doc = search_ablum artist
 	albums=[]
 
 	doc.xpath("//entry").each do |entry|
 		title = entry.at_xpath(".//title").text
-		author = entry.at_xpath(".//name").text
+		author = unless entry.at_xpath(".//name").nil?
+				 entry.at_xpath(".//name").text
+			     else
+				 "unknown(#{artist}?)"
+				 end
 		release_date = unless entry.at_xpath(".//attribute[@name='pubdate']").nil?
 							entry.at_xpath(".//attribute[@name='pubdate']").text
 					   else
