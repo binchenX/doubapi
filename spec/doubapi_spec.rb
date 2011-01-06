@@ -47,5 +47,15 @@ describe Doubapi do
 	end
 
 
+	it "should not return NULL release_date " do 
+        author = "小河"
+		Doubapi.search_albums_of(author, "2010/01").each do |album|
+			puts album.author	
+			puts album.release_date	
+			puts album.title	
+			puts album.link	
+		end
+
+	end
 
 end
