@@ -54,8 +54,20 @@ def self.looks_like_a_live_show? e, artist
 	return false
 end
 
+#return true if a >= b
+#a,b could be one of the following format
+#2010.01
+#2010.1
+#2010#1
+#2010-1
+#2010年1
+def self.compare_date a , b
+	ya, ma = a.scan(/\d{1,4}/)
+	yb, mb = b.scan(/\d{1,4}/)
+	return true if (ya.to_i * 12 + ma.to_i ) >= (yb.to_i*12+mb.to_i)
+end
 
-def self.search_album_of artist
+def self.search_album_of artist , after_date = "1900.01"
 	doc = search_ablum artist
 	albums=[]
 	doc.xpath("//entry").each do |entry|
@@ -63,8 +75,11 @@ def self.search_album_of artist
 		author = entry.at_xpath(".//name").text
 		release_date = entry.at_xpath(".//attribute[@name='pubdate']").text
     	link =  entry.at_xpath(".//link[@rel='alternate']")["href"]
-		puts "#{author} #{title} #{release_date}"
-    	albums << Douban_Album.new(author, title, release_date, link)
+    	
+		#check the release date
+		if compare_date release_date, after_date			
+			albums << Douban_Album.new(author, title, release_date, link)
+		end
 	end
 	albums
 end

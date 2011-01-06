@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:db="http://www.douban.com/xmlns/" xmlns:gd="http://schemas.google.com/g/2005" xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/" xmlns:opensearch="http://a9.com/-/spec/opensearchrss/1.0/">
+	<title>带有标签 李志 的条目</title>
+	<opensearch:startIndex>1</opensearch:startIndex>
+	<opensearch:totalResults>27</opensearch:totalResults>
+	<entry>
+		<id>http://api.douban.com/music/subject/1958731</id>
+		<title>梵高先生</title>
+		<category scheme="http://www.douban.com/2007#kind" term="http://www.douban.com/2007#music"/>
+		<author>
+			<name>李志</name>
+		</author>
+		<link href="http://api.douban.com/music/subject/1958731" rel="self"/>
+		<link href="http://music.douban.com/subject/1958731/" rel="alternate"/>
+		<link href="http://img3.douban.com/spic/s3743777.jpg" rel="image"/>
+		<db:attribute name="isrc">CNA070601780</db:attribute>
+		<db:attribute name="ean">CNA070601780</db:attribute>
+		<db:attribute name="pubdate">2007年1月11日</db:attribute>
+		<db:attribute name="singer">李志</db:attribute>
+		<db:attribute name="publisher">口袋唱片</db:attribute>
+		<gd:rating average="8.8" max="10" min="0" numRaters="15224"/>
+	</entry>
+	<entry>
+		<id>http://api.douban.com/music/subject/1933017</id>
+		<title>被禁忌的游戏</title>
+		<category scheme="http://www.douban.com/2007#kind" term="http://www.douban.com/2007#music"/>
+		<author>
+			<name>李志</name>
+		</author>
+		<link href="http://api.douban.com/music/subject/1933017" rel="self"/>
+		<link href="http://music.douban.com/subject/1933017/" rel="alternate"/>
+		<link href="http://img3.douban.com/spic/s2846631.jpg" rel="image"/>
+		<db:attribute name="isrc">CNA070604100</db:attribute>
+		<db:attribute name="ean">CNA070604100</db:attribute>
+		<db:attribute name="pubdate">2005-12-01</db:attribute>
+		<db:attribute name="singer">李志</db:attribute>
+		<db:attribute name="publisher">口袋唱片</db:attribute>
+		<gd:rating average="8.7" max="10" min="0" numRaters="9602"/>
+	</entry>
+	<entry>
+		<id>http://api.douban.com/music/subject/4060882</id>
+		<title>我爱南京</title>
+		<category scheme="http://www.douban.com/2007#kind" term="http://www.douban.com/2007#music"/>
+		<author>
+			<name>李志</name>
+		</author>
+		<link href="http://api.douban.com/music/subject/4060882" rel="self"/>
+		<link href="http://music.douban.com/subject/4060882/" rel="alternate"/>
+		<link href="http://img3.douban.com/spic/s4008894.jpg" rel="image"/>
+		<db:attribute name="pubdate">2009-10-16</db:attribute>
+		<db:attribute name="singer">李志</db:attribute>
+		<gd:rating average="8.5" max="10" min="0" numRaters="11408"/>
+	</entry>
+	<entry>
+		<id>http://api.douban.com/music/subject/3435496</id>
+		<title>工体东路没有人</title>
+		<category scheme="http://www.douban.com/2007#kind" term="http://www.douban.com/2007#music"/>
+		<author>
+			<name>李志</name>
+		</author>
+		<link href="http://api.douban.com/music/subject/3435496" rel="self"/>
+		<link href="http://music.douban.com/subject/3435496/" rel="alternate"/>
+		<link href="http://img3.douban.com/spic/s3561838.jpg" rel="image"/>
+		<db:attribute name="pubdate">2009-01-22</db:attribute>
+		<db:attribute name="singer">李志</db:attribute>
+		<db:attribute name="publisher">MicroMu</db:attribute>
+		<gd:rating average="8.9" max="10" min="0" numRaters="8735"/>
+	</entry>
+	<entry>
+		<id>http://api.douban.com/music/subject/1918315</id>
+		<title>B&amp;B</title>
+		<category scheme="http://www.douban.com/2007#kind" term="http://www.douban.com/2007#music"/>
+		<author>
+			<name>李志</name>
+		</author>
+		<link href="http://api.douban.com/music/subject/1918315" rel="self"/>
+		<link href="http://music.douban.com/subject/1918315/" rel="alternate"/>
+		<link href="http://img3.douban.com/spic/s2329976.jpg" rel="image"/>
+		<db:attribute name="isrc">CNS040444800</db:attribute>
+		<db:attribute name="pubdate">2004-12</db:attribute>
+		<db:attribute name="singer">李志</db:attribute>
+		<db:attribute name="publisher">VAYA</db:attribute>
+		<gd:rating average="9.0" max="10" min="0" numRaters="6273"/>
+	</entry>
+	<opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+</feed>
+
