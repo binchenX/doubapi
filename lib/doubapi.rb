@@ -49,7 +49,6 @@ def self.looks_like_a_live_show? e, artist
 	#2010-08-13F21:30:00+08:00
 	_,_,_,hour = e.when.scan(/\d{1,4}/);
 
-	puts "==========================events happend at #{e.when},  #{hour}"
 	return true if hour.to_i > 18 and e.what.include?(artist)
 	return false
 end
