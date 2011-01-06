@@ -1,0 +1,20 @@
+Usage:
+require 'doubapi'
+
+key = "许巍"
+Doubapi.search_events_of(key).each do |event|
+		puts event.title
+		puts event.when
+		puts event.where
+		puts event.link
+end
+
+author = "李志"
+Doubapi.search_albums_of(author, "2010-05").each do |album|
+		puts album.author	
+		puts album.release_date	
+		puts album.title	
+		puts album.link	
+end
+
+
