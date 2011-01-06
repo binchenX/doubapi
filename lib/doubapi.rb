@@ -39,6 +39,9 @@ def self.search_ablum artist_chinese ,max=10
 end
 
 Douban_Event =  Struct.new :title, :when, :where, :what, :link
+
+#
+#release_date is in the format of YY-MM-DD
 Douban_Album =  Struct.new :author, :title, :release_date,  :link
 
 
@@ -84,10 +87,16 @@ def self.search_albums_of artist , after_date = "1900.01"
 							"0000-00"
 					   end
     	link =  entry.at_xpath(".//link[@rel='alternate']")["href"]
-    	
+    
+		#make release data YY-MM-DD style
+		r = release_date.scan(/\d{1,4}/)
+		#if DD was not specified
+		r << "01"         if r.size == 2
+		r << "01" << "01" if r.size == 1 
+		formated_release_day = "#{r[0]}-#{r[1]}-#{r[2]}" 
 		#check the release date
 		if compare_date release_date, after_date			
-			albums << Douban_Album.new(author, title, release_date, link)
+			albums << Douban_Album.new(author, title, formated_release_day, link)
 		end
 	end
 	albums

@@ -24,16 +24,18 @@ describe Doubapi do
 
 	it "should be able to search albums of 李志 that released after 2010 " do 
 		author = "李志"
-		Doubapi.search_albums_of(author, "2010/05").each do |album|
+		Doubapi.search_albums_of(author, "2010-05").each do |album|
 			puts album.author	
 			puts album.release_date	
 			puts album.title	
 			puts album.link	
+
+		   album.release_date.should >= "2010-05"
 		end
 	end
 
 
-	it "should be handle the result when search the albums of 何勇 " do 
+	it "should be handle the search results that have no author node" do 
 		author = "何勇"
 		Doubapi.search_albums_of(author, "2010/01").each do |album|
 			puts album.author	
