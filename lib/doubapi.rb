@@ -7,7 +7,31 @@ require 'pp'
 module Doubapi
 #return a Nokogiri XML  object
 #use Douban API
-def self.douban_get_xml url
+
+
+Event =  Struct.new :title, :when, :where, :what, :link
+#release_date is in the format of YY-MM-DD
+Album =  Struct.new :author, :title, :release_date,  :link
+
+
+#return Doubapi::Event[]
+def self.search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
+	Douban.search_events_of artist, after_date
+end
+
+
+
+#return Doubapi::Album[]
+def self.search_albums_of artist , after_date = "1900.01"
+	Douban.search_albums_of artist ,after_date
+end
+
+protected 
+class Douban 
+
+#instance method
+class << self
+def douban_get_xml url
 	puts url
 	#I have forgot why i need to specify the user agend
     doc = open(url,'User-Agent' => 'ruby')
@@ -23,7 +47,7 @@ end
 
 #return Atom
 #Douban search : will return results that does not match 
-def self.search_event key_chinese, location = "shanghai" ,max=20
+def search_event key_chinese, location = "shanghai" ,max=20
 
   if (key_chinese.downcase == "all")
 	uri="http://api.douban.com/event/location/#{location}?type=music&start-index=1&max-results=#{max}"
@@ -37,7 +61,7 @@ def self.search_event key_chinese, location = "shanghai" ,max=20
   douban_get_xml(uri)
 end
 
-def self.search_ablum artist_chinese ,max=10
+def search_ablum artist_chinese ,max=10
   keywords= "%" + artist_chinese.each_byte.map {|c| c.to_s(16)}.join("%")
   uri="http://api.douban.com/music/subjects?tag=#{keywords}&start-index=1&max-results=#{max}"
   #Let's grab it slowly to avoid being baned...	
@@ -45,15 +69,9 @@ def self.search_ablum artist_chinese ,max=10
   douban_get_xml(uri)
 end
 
-Douban_Event =  Struct.new :title, :when, :where, :what, :link
-
-#
-#release_date is in the format of YY-MM-DD
-Douban_Album =  Struct.new :author, :title, :release_date,  :link
-
 
 #TODO
-def self.looks_like_a_live_show? e, artist
+def looks_like_a_live_show? e, artist
 
 	#check e.when should happen
 	#2010-08-13F21:30:00+08:00
@@ -75,13 +93,13 @@ end
 #2010#1
 #2010-1
 #2010年1
-def self.compare_date a , b
+def compare_date a , b
 	ya, ma = a.scan(/\d{1,4}/)
 	yb, mb = b.scan(/\d{1,4}/)
 	return true if (ya.to_i * 12 + ma.to_i ) >= (yb.to_i*12+mb.to_i)
 end
 
-def self.search_albums_of artist , after_date = "1900.01"
+def search_albums_of artist , after_date = "1900.01"
 	doc = search_ablum artist
 	albums=[]
 
@@ -114,7 +132,7 @@ def self.search_albums_of artist , after_date = "1900.01"
 		formated_release_day = "#{y}-#{m}-#{d}" 
 		#check the release date
 		if compare_date release_date, after_date			
-			albums << Douban_Album.new(author, title, formated_release_day, link)
+			albums << Doubapi::Album.new(author, title, formated_release_day, link)
 		end
 	end
 	albums
@@ -126,12 +144,12 @@ end
   #"时间：2010年8月13日 周五 21:30 -  23:55"
   #or
   #2010-08-13F21:30:00+08:00
-  def self.parse_date date
+  def parse_date date
     year, month , day = date.scan(/\d{1,4}/)
     Time.local(year,month,day)
   end
 
-def self.search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
+def search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
 
   doc = search_event artist
   events=[]
@@ -147,7 +165,7 @@ def self.search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
 
 	#check the date
 	if parse_date(start_time) > parse_date(after_date)
-	    events << Douban_Event.new(title, start_time, where, what, link)
+	    events << Doubapi::Event.new(title, start_time, where, what, link)
     end
   end
 	
@@ -155,22 +173,7 @@ def self.search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
   events.select{|e| looks_like_a_live_show?(e,artist)}
 end
 
-
-
-if __FILE__== $0
-#should use Artist Model
-#File.read("./app/controllers/artists.txt").split("\n").each {|artist| Artist.new(:name=>artist,:intro=>"no").save}
-#Artist.all.each {|a| puts a.name}
-File.read("artists.txt").split("\n").each do |artist|
-	puts artist
-	e = search_events_of artist
-  	e.each do |event|
-    	puts event.title
-  		puts event.when
-  		puts event.where
-        puts event.what
-  end
-end
-end
+end #self,instance method end
+end #Class Douban
 
 end #Module  
