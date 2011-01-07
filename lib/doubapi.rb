@@ -9,6 +9,7 @@ module Doubapi
 #use Douban API
 def self.douban_get_xml url
 	puts url
+	#I have forgot why i need to specify the user agend
     doc = open(url,'User-Agent' => 'ruby')
     Nokogiri::HTML(doc,nil, "utf-8")
     #Nokogiri::HTML(open(url,:proxy => nil,'User-Agent' => 'ruby'),nil, "utf-8")
@@ -23,8 +24,14 @@ end
 #return Atom
 #Douban search : will return results that does not match 
 def self.search_event key_chinese, location = "shanghai" ,max=20
+
+  if (key_chinese.downcase == "all")
+	uri="http://api.douban.com/event/location/#{location}?type=music&start-index=1&max-results=#{max}"
+  else
   keywords= "%" + key_chinese.each_byte.map {|c| c.to_s(16)}.join("%")
   uri="http://api.douban.com/events?q=#{keywords}&location=#{location}&start-index=1&max-results=#{max}"
+  end
+
   #Let's grab it slowly to avoid being baned...	
   sleep(7) 	
   douban_get_xml(uri)
@@ -52,7 +59,12 @@ def self.looks_like_a_live_show? e, artist
 	#2010-08-13F21:30:00+08:00
 	_,_,_,hour = e.when.scan(/\d{1,4}/);
 
-	return true if hour.to_i > 18 and e.what.include?(artist)
+	if artist.downcase == "all"
+		return true if hour.to_i > 18
+	else
+		return true if hour.to_i > 18 and e.what.include?(artist) 
+	end
+
 	return false
 end
 

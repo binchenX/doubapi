@@ -69,4 +69,16 @@ describe Doubapi do
 				puts event.link
 		end	
    end
+
+	it "should search all the music events if no artist is specified" do 
+
+		Doubapi.search_events_of("all").each do |event|
+				puts event.title
+				puts event.when
+				puts event.where
+				puts event.link
+		end	
+
+    end
+
 end
