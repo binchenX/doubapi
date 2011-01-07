@@ -58,4 +58,15 @@ describe Doubapi do
 
 	end
 
+
+   it "should be able to search all the shows in 育音堂 and the event.when should later than the time when the search happened if after_date has not specified" do
+		key = "育音堂"
+		Doubapi.search_events_of(key).each do |event|
+				event.what.should be_include(key)
+				puts event.title
+				puts event.when
+				puts event.where
+				puts event.link
+		end	
+   end
 end

@@ -22,9 +22,9 @@ end
 
 #return Atom
 #Douban search : will return results that does not match 
-def self.search_event key_chinese, location = "shanghai"
+def self.search_event key_chinese, location = "shanghai" ,max=20
   keywords= "%" + key_chinese.each_byte.map {|c| c.to_s(16)}.join("%")
-  uri="http://api.douban.com/events?q=#{keywords}&location=#{location}&start-index=1&max-results=5"
+  uri="http://api.douban.com/events?q=#{keywords}&location=#{location}&start-index=1&max-results=#{max}"
   #Let's grab it slowly to avoid being baned...	
   sleep(7) 	
   douban_get_xml(uri)
@@ -108,7 +108,19 @@ def self.search_albums_of artist , after_date = "1900.01"
 	albums
 end
 
-def self.search_events_of artist
+
+  #return Time object
+  #date format is
+  #"时间：2010年8月13日 周五 21:30 -  23:55"
+  #or
+  #2010-08-13F21:30:00+08:00
+  def self.parse_date date
+    year, month , day = date.scan(/\d{1,4}/)
+    Time.local(year,month,day)
+  end
+
+def self.search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
+
   doc = search_event artist
   events=[]
   doc.xpath("//entry").each do |entry|
@@ -120,7 +132,11 @@ def self.search_events_of artist
     where = entry.at_xpath('.//where')["valuestring"]
     link =  entry.at_xpath(".//link[@rel='alternate']")["href"]
     what = entry.at_xpath(".//content").text
-    events << Douban_Event.new(title, start_time, where, what, link)
+
+	#check the date
+	if parse_date(start_time) > parse_date(after_date)
+	    events << Douban_Event.new(title, start_time, where, what, link)
+    end
   end
 	
   #filtering of the results
