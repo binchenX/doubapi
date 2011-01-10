@@ -34,7 +34,7 @@ class << self
 def douban_get_xml url
 	puts url
 	#I have forgot why i need to specify the user agend
-    doc = open(url,'User-Agent' => 'ruby')
+    doc = open(url, :proxy => nil, 'User-Agent' => 'ruby')
     Nokogiri::HTML(doc,nil, "utf-8")
     #Nokogiri::HTML(open(url,:proxy => nil,'User-Agent' => 'ruby'),nil, "utf-8")
 	#no network access, used to simulator 
