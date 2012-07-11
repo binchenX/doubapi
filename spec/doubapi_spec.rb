@@ -1,4 +1,5 @@
-require 'lib/doubapi'
+#encoding: utf-8
+require 'doubapi'
 describe Doubapi do 
 
 	it "should be able to search 许巍 " do 

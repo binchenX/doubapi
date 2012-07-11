@@ -1,4 +1,4 @@
-require 'rubygems'  #a hack to require failure for nokogiri
+require 'RUBYgems'  #a hack to require failure for nokogiri
 require 'open-uri'
 require 'nokogiri'
 require 'pp'
@@ -13,17 +13,17 @@ Event =  Struct.new :title, :when, :where, :what, :link
 #release_date is in the format of YY-MM-DD
 Album =  Struct.new :author, :title, :release_date,  :link
 
-
+#input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
 #return Doubapi::Event[]
-def self.search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
-	Douban.search_events_of artist, after_date
+def self.search_events_of h
+	Douban.search_events_of h
 end
 
 
-
+#input {:singer,:since}
 #return Doubapi::Album[]
-def self.search_albums_of artist , after_date = "1900.01"
-	Douban.search_albums_of artist ,after_date
+def self.search_albums_of h 
+	Douban.search_albums_of h 
 end
 
 protected 
@@ -47,13 +47,19 @@ end
 
 #return Atom
 #Douban search : will return results that does not match 
-def search_event key_chinese, location = "shanghai" ,max=20
+def search_event h
+  puts h.inspect
+
+  key_chinese = h[:key]
+  location    = h[:location] || "shanghai"
+  start_index = h[:start_index] || 1
+  max         = h[:max_result]|| 20
 
   if (key_chinese.downcase == "all")
-	uri="http://api.douban.com/event/location/#{location}?type=music&start-index=1&max-results=#{max}"
+	uri="http://api.douban.com/event/location/#{location}?type=music&start-index=#{start_index}&max-results=#{max}"
   else
   keywords= "%" + key_chinese.each_byte.map {|c| c.to_s(16)}.join("%")
-  uri="http://api.douban.com/events?q=#{keywords}&location=#{location}&start-index=1&max-results=#{max}"
+  uri="http://api.douban.com/events?q=#{keywords}&location=#{location}&start-index=#{start_index}&max-results=#{max}"
   end
 
   #Let's grab it slowly to avoid being baned...	
@@ -61,7 +67,9 @@ def search_event key_chinese, location = "shanghai" ,max=20
   douban_get_xml(uri)
 end
 
-def search_ablum artist_chinese ,max=10
+def search_ablum h
+  artist_chinese = h[:singer]
+  max=h[:max_result]||10
   keywords= "%" + artist_chinese.each_byte.map {|c| c.to_s(16)}.join("%")
   uri="http://api.douban.com/music/subjects?tag=#{keywords}&start-index=1&max-results=#{max}"
   #Let's grab it slowly to avoid being baned...	
@@ -99,8 +107,10 @@ def compare_date a , b
 	return true if (ya.to_i * 12 + ma.to_i ) >= (yb.to_i*12+mb.to_i)
 end
 
-def search_albums_of artist , after_date = "1900.01"
-	doc = search_ablum artist
+def search_albums_of h 
+  artist = h[:singer]
+  after_date = h[:since]||"1900.01"
+	doc = search_ablum h
 	albums=[]
 
 	doc.xpath("//entry").each do |entry|
@@ -149,9 +159,12 @@ end
     Time.local(year,month,day)
   end
 
-def search_events_of artist , after_date =  Time.now.strftime("%Y-%m")
-
-  doc = search_event artist
+def search_events_of(h={})
+  
+  puts h.inspect
+  artist = h[:key]
+  after_date =  h[:after_date]||Time.now.strftime("%Y-%m")
+  doc = search_event h
   events=[]
   doc.xpath("//entry").each do |entry|
     #pp entry
