@@ -11,7 +11,7 @@ module Doubapi
 
 Event =  Struct.new :title, :when, :where, :what, :link
 #release_date is in the format of YY-MM-DD
-Album =  Struct.new :author, :title, :release_date,  :link
+Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:publisher,:mobile_site
 
 #input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
 #return Doubapi::Event[]
@@ -23,7 +23,7 @@ end
 #input {:singer,:since}
 #return Doubapi::Album[]
 def self.search_albums_of h 
-	Douban.search_albums_of h 
+ 	Douban.search_albums_of h 
 end
 
 protected 
@@ -34,13 +34,19 @@ class << self
 def douban_get_xml url
 	puts url
 	#I have forgot why i need to specify the user agend
-    doc = open(url, :proxy => nil, 'User-Agent' => 'ruby')
-    Nokogiri::HTML(doc,nil, "utf-8")
-    #Nokogiri::HTML(open(url,:proxy => nil,'User-Agent' => 'ruby'),nil, "utf-8")
+  doc = open(url, :proxy => nil, 'User-Agent' => 'ruby')
+  if doc.nil?
+    puts "error:failed to open #{url}"
+    return nil;
+  end
+  
+  Nokogiri::HTML(doc,nil, "utf-8")
+  
+  #Nokogiri::HTML(open(url,:proxy => nil,'User-Agent' => 'ruby'),nil, "utf-8")
 	#no network access, used to simulator 
 	#doc = File.read(File.join(RAILS_ROOT, "app","controllers","event_sample.xml"))
 	#Nokogiri::HTML(doc,nil, "utf-8")
-    #Nokogiri::HTML(open(url,:proxy => nil,'User-Agent' => 'ruby'),nil, "utf-8")
+  #Nokogiri::HTML(open(url,:proxy => nil,'User-Agent' => 'ruby'),nil, "utf-8")
 end
 
 
@@ -107,45 +113,55 @@ def compare_date a , b
 	return true if (ya.to_i * 12 + ma.to_i ) >= (yb.to_i*12+mb.to_i)
 end
 
+
+def formate_release_date release_date
+   	#make release data YY-MM-DD style
+  	r = release_date.scan(/\d{1,4}/)
+  	#if DD was not specified
+  	r << "01"         if r.size == 2
+  	r << "01" << "01" if r.size == 1
+
+  	y , m , d = r
+
+  	m = "01" unless (1..12).include?(m.to_i) 
+  	d = "01" unless (1..30).include?(d.to_i)
+  	
+  	"#{y}-#{m}-#{d}" 
+end
+
 def search_albums_of h 
   artist = h[:singer]
   after_date = h[:since]||"1900.01"
-	doc = search_ablum h
-	albums=[]
-
-	doc.xpath("//entry").each do |entry|
-		title = entry.at_xpath(".//title").text
-		author = unless entry.at_xpath(".//name").nil?
-				 entry.at_xpath(".//name").text
-			     else
-				 "unknown(#{artist}?)"
-				 end
-		release_date = unless entry.at_xpath(".//attribute[@name='pubdate']").nil?
-							entry.at_xpath(".//attribute[@name='pubdate']").text
-					   else
-							#means unknow
-							"0000-00"
-					   end
-    	link =  entry.at_xpath(".//link[@rel='alternate']")["href"]
-    
-		#make release data YY-MM-DD style
-		r = release_date.scan(/\d{1,4}/)
-		#if DD was not specified
-		r << "01"         if r.size == 2
-		r << "01" << "01" if r.size == 1
-	
-		y , m , d = r
-
-		m = "01" unless (1..12).include?(m.to_i) 
-		d = "01" unless (1..30).include?(d.to_i) 
-
-		formated_release_day = "#{y}-#{m}-#{d}" 
-		#check the release date
-		if compare_date release_date, after_date			
-			albums << Doubapi::Album.new(author, title, formated_release_day, link)
-		end
-	end
-	albums
+  doc = search_ablum h
+ 
+  if(doc.nil?) 
+    return [];
+  end
+  
+  albums=[]
+  doc.xpath("//entry").each do |entry|
+  	title = entry.at_xpath(".//title").text
+  	#author
+  	authorItem = entry.at_xpath(".//name")
+  	author = if authorItem.nil? then artist else authorItem.text end
+  	#link - pc web
+		link =  entry.at_xpath(".//link[@rel='alternate']")["href"]
+	  cover_thumnail = entry.at_xpath(".//link[@rel='image']")["href"]
+	  #publisher
+  	pubItem = entry.at_xpath(".//attribute[@name='publisher']")
+  	publisher = if pubItem.nil? then "unknow" else pubItem.text end
+    #link - mobile_site
+  	mobile_site = entry.at_xpath(".//link[@rel='mobile']")["href"]
+    #release_date
+    pubDateItem = entry.at_xpath(".//attribute[@name='pubdate']")
+    release_date = if pubDateItem.nil? then "0000-00" else pubDateItem.text end
+  	formated_release_day = formate_release_date(release_date)
+  	#check the release date
+  	if compare_date release_date, after_date			
+  		albums << Doubapi::Album.new(author, title, formated_release_day, link, cover_thumnail,publisher,mobile_site)
+  	end
+  end
+  albums
 end
 
 

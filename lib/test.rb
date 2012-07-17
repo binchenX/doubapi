@@ -20,10 +20,14 @@ end
 def test2
   author = "李志"
   Doubapi.search_albums_of(:singer=>author,:since=>"2010-05").each do |album|
+    puts "-------------------------------"
     puts album.author	
     puts album.release_date	
     puts album.title	
+    puts album.cover_thumbnail
+    puts album.publisher
     puts album.link	
+    puts album.mobile_site
   end
 end 
 
