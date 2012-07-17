@@ -38,8 +38,10 @@ def test3
   puts "1-30"
   Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 30).each do |event|
     puts "#{event.when} #{event.title}"
-    #puts event.where
-    #puts event.link
+    puts event.where
+    puts event.link
+    puts event.bar_icon
+  
   end
   
   puts "1-15"
@@ -60,7 +62,19 @@ def test3
 end
 
 
+def test4
+  
+  Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 1).each do |event|
+    puts "#{event.when} #{event.title}"
+    puts event.where
+    puts event.link
+    puts event.poster_mobile
+    puts event.bar_icon
+  end
+  
+end 
+
 #test3
 #test1
-test2
-
+#test2
+test4

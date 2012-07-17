@@ -9,7 +9,7 @@ module Doubapi
 #use Douban API
 
 
-Event =  Struct.new :title, :when, :where, :what, :link
+Event =  Struct.new :title, :when, :where, :what,:link,:poster_mobile,:bar_icon
 #release_date is in the format of YY-MM-DD
 Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:publisher,:mobile_site
 
@@ -191,10 +191,13 @@ def search_events_of(h={})
     where = entry.at_xpath('.//where')["valuestring"]
     link =  entry.at_xpath(".//link[@rel='alternate']")["href"]
     what = entry.at_xpath(".//content").text
+    posterItem = entry.at_xpath(".//link[@rel='image-lmobile']")
+    poster_mobile = if posterItem.nil? then "empty" else posterItem["href"] end
+    bar_icon = entry.at_xpath(".//author").at_xpath(".//link[@rel='icon']")["href"]
 
 	#check the date
 	if parse_date(start_time) > parse_date(after_date)
-	    events << Doubapi::Event.new(title, start_time, where, what, link)
+	    events << Doubapi::Event.new(title, start_time, where, what, link, poster_mobile, bar_icon)
     end
   end
 	
