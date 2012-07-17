@@ -19,7 +19,7 @@ end
 
 def test2
   author = "李志"
-  Doubapi.search_albums_of(:singer=>author,:since=>"2010-05").each do |album|
+  Doubapi.search_albums_of(:singer=>author,:since=>"2010-05") do |album|
     puts "-------------------------------"
     puts album.author	
     puts album.release_date	
@@ -33,38 +33,53 @@ end
 
 
 
-def test3
+def test_get_all_events
   
-  puts "1-30"
-  Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 30).each do |event|
-    puts "#{event.when} #{event.title}"
-    puts event.where
-    puts event.link
-    puts event.bar_icon
   
+  puts "trying to get 30 first"
+  
+  batch_size = 30;
+  totalResults1 = Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => batch_size) do |event|
+   # puts "#{event.when} #{event.title}"
   end
   
-  puts "1-15"
+  puts "total results #{totalResults1} ,will fetch others"
   
-  Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 15).each do |event|
-    puts "#{event.when} #{event.title}"
-    #puts event.where
-    #puts event.link
+  return if(totalResults1 <= batch_size)
+  
+  (2..totalResults1/batch_size).each do |i|
+    start_index = (i-1)*batch_size+1;
+    max_result = batch_size;
+    puts "start_index :#{start_index}"
+    Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => start_index, :max_result => max_result) do |event|
+     # puts "#{event.when} #{event.title}"
+    end
+    
   end
   
-  puts "16-30"
+  return if((totalResults1%batch_size)==0)
   
-  Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 16,:max_result => 15).each do |event|
-    puts "#{event.when} #{event.title}"
-    #puts event.where
-    #puts event.link
+  last_fetch_size = totalResults1 - (totalResults1/batch_size)*batch_size;
+  
+  start_index = (totalResults1/batch_size)*batch_size+1;
+  max_result = last_fetch_size;
+  puts "start_index :#{start_index}"
+  Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => start_index, :max_result => max_result) do |event|
+   # puts "#{event.when} #{event.title}"
   end
+  
+  
+  
+  
+    
+
+  
 end
 
 
 def test4
   
-  Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 1).each do |event|
+  totalResults = Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 1) do |event|
     puts "#{event.when} #{event.title}"
     puts event.where
     puts event.link
@@ -72,9 +87,11 @@ def test4
     puts event.bar_icon
   end
   
+  puts "totalResults #{totalResults}"
+  
 end 
 
-#test3
+test_get_all_events
 #test1
 #test2
-test4
+#test4

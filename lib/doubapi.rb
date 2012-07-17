@@ -27,26 +27,39 @@ require 'nokogiri'
 require 'pp'
 
 
+#useful information:
+#when accessing the the Nokogiri parsed result, all the name are downcase-d
+#for example : to access the totalResults element
+#<openSearch:totalResults>111</openSearch:totalResults>
+#you should use doc.at_xpath(".//totalresults")
+
+#at_xpath  is to return single element and you know only there is only one element.
+#xpath is to return an array of elements
+
 module Doubapi
 #return a Nokogiri XML  object
 #use Douban API
-
-
 Event =  Struct.new :title, :when, :where, :what,:link,:poster_mobile,:bar_icon
 #release_date is in the format of YY-MM-DD
 Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:publisher,:mobile_site
 
 #input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
-#return Doubapi::Event[]
-def self.search_events_of h
-	Douban.search_events_of h
+#return total number of events satisfying the search criterion 
+#Doubapi::Event[]
+def self.search_events_of h ,&block
+	totalResult, returnedResult = Douban.search_events_of h 
+	returnedResult.each {|event| block.call(event) if block_given?}
+	return totalResult;
 end
 
 
 #input {:singer,:since}
+#return total number of events satisfying the search criterion 
 #return Doubapi::Album[]
-def self.search_albums_of h 
- 	Douban.search_albums_of h 
+def self.search_albums_of h ,&block
+ totalResult, returnedResult =	Douban.search_albums_of h 
+ returnedResult.each {|album| block.call(album) if block_given?}
+ return totalResult;
 end
 
 protected 
@@ -152,15 +165,23 @@ def formate_release_date release_date
   	"#{y}-#{m}-#{d}" 
 end
 
+
+#
+#search albums tagged with h[:singer]. It is not quite accurate. I have seen some irrevlant result are returned.
+#
+#
 def search_albums_of h 
   artist = h[:singer]
   after_date = h[:since]||"1900.01"
   doc = search_ablum h
  
   if(doc.nil?) 
-    return [];
+    return [0,[]];
   end
   
+  #the totalResult here trying
+  #totalResults = doc.at_xpath(".//totalresults").text.to_i
+   
   albums=[]
   doc.xpath("//entry").each do |entry|
   	title = entry.at_xpath(".//title").text
@@ -184,7 +205,8 @@ def search_albums_of h
   		albums << Doubapi::Album.new(author, title, formated_release_day, link, cover_thumnail,publisher,mobile_site)
   	end
   end
-  albums
+  #improve ME
+  [albums.size,albums]
 end
 
 
@@ -199,12 +221,13 @@ end
   end
 
 def search_events_of(h={})
-  
-  puts h.inspect
   artist = h[:key]
   after_date =  h[:after_date]||Time.now.strftime("%Y-%m")
   doc = search_event h
   events=[]
+  
+  #NOTES:all the key will be downcase-d
+  totalResults = doc.at_xpath(".//totalresults").text.to_i
   doc.xpath("//entry").each do |entry|
     #pp entry
     title = entry.at_xpath(".//title").text
@@ -216,7 +239,9 @@ def search_events_of(h={})
     what = entry.at_xpath(".//content").text
     posterItem = entry.at_xpath(".//link[@rel='image-lmobile']")
     poster_mobile = if posterItem.nil? then "empty" else posterItem["href"] end
-    bar_icon = entry.at_xpath(".//author").at_xpath(".//link[@rel='icon']")["href"]
+    authItem = entry.at_xpath(".//author")
+    iconLink = if authItem.nil? then nil else authItem.at_xpath(".//link[@rel='icon']") end
+    bar_icon = if (iconLink.nil?) then nil else iconLink["href"] end
 
 	#check the date
 	if parse_date(start_time) > parse_date(after_date)
@@ -225,7 +250,9 @@ def search_events_of(h={})
   end
 	
   #filtering of the results
-  events.select{|e| looks_like_a_live_show?(e,artist)}
+  events.select!{|e| looks_like_a_live_show?(e,artist)}
+  
+  [totalResults, events]
 end
 
 end #self,instance method end
