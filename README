@@ -1,20 +1,29 @@
 Usage:
 require 'doubapi'
 
-key = "许巍"
-Doubapi.search_events_of(key).each do |event|
-		puts event.title
-		puts event.when
-		puts event.where
-		puts event.link
+
+Release NOTES:
+1.2012/7/17: v0.1.0: The API have been changed in 0.1.0 release and it is not backward compatible.
+
+Previously:
+
+Doubapi.search_events_of("all").each do |event|
+	puts event.title
+	puts event.when
+	puts event.where
+	puts event.link
 end
 
-author = "李志"
-Doubapi.search_albums_of(author, "2010-05").each do |album|
-		puts album.author	
-		puts album.release_date	
-		puts album.title	
-		puts album.link	
+After 0.1.0
+
+Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 30) do |event|
+	puts event.title
+	puts event.when
+	puts event.where
+	puts event.link
 end
+
+
+check lib/test.rb for more usage.
 
 
