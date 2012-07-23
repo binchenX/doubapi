@@ -91,7 +91,24 @@ def test4
   
 end 
 
-test_get_all_events
+def test5
+  
+  totalResults ,events = Doubapi.search_events_of(:key => "all", :location => "shanghai", :start_index => 1,:max_result => 5)
+  
+  events.each do |event|
+    puts "#{event.when} #{event.title}"
+    puts event.where
+    puts event.link
+    puts event.poster_mobile
+    puts event.bar_icon
+  end
+  
+  puts "totalResults #{totalResults}"
+  
+end
+
+#test_get_all_events
 #test1
-#test2
+test2
 #test4
+#test5

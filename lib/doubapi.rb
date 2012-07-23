@@ -41,15 +41,21 @@ module Doubapi
 #use Douban API
 Event =  Struct.new :title, :when, :where, :what,:link,:poster_mobile,:bar_icon
 #release_date is in the format of YY-MM-DD
-Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:publisher,:mobile_site
+Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:cover_big,:publisher,:mobile_site
 
 #input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
 #return total number of events satisfying the search criterion 
 #Doubapi::Event[]
 def self.search_events_of h ,&block
 	totalResult, returnedResult = Douban.search_events_of h 
-	returnedResult.each {|event| block.call(event) if block_given?}
-	return totalResult;
+	
+	if block_given?
+	  returnedResult.each {|event| block.call(event) if block_given?}
+	  return totalResult;
+  else
+    return [totalResult, returnedResult]
+  end
+	
 end
 
 
@@ -58,8 +64,12 @@ end
 #return Doubapi::Album[]
 def self.search_albums_of h ,&block
  totalResult, returnedResult =	Douban.search_albums_of h 
- returnedResult.each {|album| block.call(album) if block_given?}
- return totalResult;
+ if block_given?
+   returnedResult.each {|album| block.call(album) }
+   return totalResult;
+ else
+   return [totalResult, returnedResult]
+ end
 end
 
 protected 
@@ -191,6 +201,13 @@ def search_albums_of h
   	#link - pc web
 		link =  entry.at_xpath(".//link[@rel='alternate']")["href"]
 	  cover_thumnail = entry.at_xpath(".//link[@rel='image']")["href"]
+	  
+	  #cover big 
+	  #example:
+	  #thumbnail http://img1.douban.com/spic/s1461123.jpg
+	  #big       http://img1.douban.com/lpic/s1461123.jpg
+	  cover_big = cover_thumnail.gsub("spic","lpic");
+	  
 	  #publisher
   	pubItem = entry.at_xpath(".//attribute[@name='publisher']")
   	publisher = if pubItem.nil? then "unknow" else pubItem.text end
@@ -202,7 +219,7 @@ def search_albums_of h
   	formated_release_day = formate_release_date(release_date)
   	#check the release date
   	if compare_date release_date, after_date			
-  		albums << Doubapi::Album.new(author, title, formated_release_day, link, cover_thumnail,publisher,mobile_site)
+  		albums << Doubapi::Album.new(author, title, formated_release_day, link, cover_thumnail,cover_big ,publisher,mobile_site)
   	end
   end
   #improve ME
