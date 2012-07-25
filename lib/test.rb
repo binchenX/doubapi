@@ -18,8 +18,9 @@ end
 
 
 def test2
-  author = "李志"
-  Doubapi.search_albums_of(:singer=>author,:since=>"2010-05") do |album|
+  #author = "李志"
+  author = "窦唯"
+  total = Doubapi.search_albums_of(:singer=>author,:since=>"1900-05",:max_result => 20) do |album|
     puts "-------------------------------"
     puts album.author	
     puts album.release_date	
@@ -28,7 +29,10 @@ def test2
     puts album.publisher
     puts album.link	
     puts album.mobile_site
+    puts album.rating
   end
+  
+  puts "total #{total}"
 end 
 
 

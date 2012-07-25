@@ -41,7 +41,7 @@ module Doubapi
 #use Douban API
 Event =  Struct.new :title, :when, :where, :what,:link,:poster_mobile,:bar_icon
 #release_date is in the format of YY-MM-DD
-Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:cover_big,:publisher,:mobile_site
+Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:cover_big,:publisher,:mobile_site,:rating
 
 #input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
 #return total number of events satisfying the search criterion 
@@ -211,6 +211,9 @@ def search_albums_of h
 	  #publisher
   	pubItem = entry.at_xpath(".//attribute[@name='publisher']")
   	publisher = if pubItem.nil? then "unknow" else pubItem.text end
+  	  
+  	#rating
+  	rating = entry.at_xpath(".//rating")["average"]
     #link - mobile_site
   	mobile_site = entry.at_xpath(".//link[@rel='mobile']")["href"]
     #release_date
@@ -219,7 +222,7 @@ def search_albums_of h
   	formated_release_day = formate_release_date(release_date)
   	#check the release date
   	if compare_date release_date, after_date			
-  		albums << Doubapi::Album.new(author, title, formated_release_day, link, cover_thumnail,cover_big ,publisher,mobile_site)
+  		albums << Doubapi::Album.new(author, title, formated_release_day, link, cover_thumnail,cover_big ,publisher,mobile_site,rating)
   	end
   end
   #improve ME
