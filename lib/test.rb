@@ -20,7 +20,10 @@ end
 def test2
   #author = "李志"
   author = "窦唯"
-  total = Doubapi.search_albums_of(:singer=>author,:since=>"1900-05",:max_result => 20) do |album|
+  total, albums = Doubapi.search_albums_of(:singer=>author,:since=>"1900-05",:max_result => 20) 
+  
+  #release date decending
+  albums.sort {|a , b| b.release_date <=> a.release_date }.each do |album|
     puts "-------------------------------"
     puts album.author	
     puts album.release_date	
@@ -32,6 +35,20 @@ def test2
     puts album.rating
   end
   
+  #rating decending
+  
+  #release date decending
+   albums.sort {|a , b| b.rating <=> a.rating }.each do |album|
+     puts "-------------------------------"
+     puts album.author	
+     puts album.release_date	
+     puts album.title	
+     puts album.cover_thumbnail
+     puts album.publisher
+     puts album.link	
+     puts album.mobile_site
+     puts album.rating
+   end
   puts "total #{total}"
 end 
 
