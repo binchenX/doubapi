@@ -33,6 +33,10 @@ def test2
     puts album.link	
     puts album.mobile_site
     puts album.rating
+
+		album.tracks.each do |track|
+			puts track.title
+		end
   end
   
   #rating decending

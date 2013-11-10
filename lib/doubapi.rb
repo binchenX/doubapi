@@ -21,11 +21,12 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-require 'RUBYgems'  #a hack to require failure for nokogiri
+require 'rubygems'  #a hack to require failure for nokogiri
 require 'open-uri'
 require 'nokogiri'
 require 'pp'
 
+require 'json'
 
 #useful information:
 #when accessing the the Nokogiri parsed result, all the name are downcase-d
@@ -41,7 +42,10 @@ module Doubapi
 #use Douban API
 Event =  Struct.new :title, :when, :where, :what,:link,:poster_mobile,:bar_icon
 #release_date is in the format of YY-MM-DD
-Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:cover_big,:publisher,:mobile_site,:rating
+Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:cover_big,:publisher,:mobile_site,:rating,:tracks
+
+Track = Struct.new :title
+
 
 #input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
 #return total number of events satisfying the search criterion 
@@ -63,7 +67,7 @@ end
 #return total number of events satisfying the search criterion 
 #return Doubapi::Album[]
 def self.search_albums_of h ,&block
- totalResult, returnedResult =	Douban.search_albums_of h 
+ totalResult, returnedResult =	Douban.search_albums_of_v2 h 
  if block_given?
    returnedResult.each {|album| block.call(album) }
    return totalResult;
@@ -174,6 +178,49 @@ def formate_release_date release_date
   	
   	"#{y}-#{m}-#{d}" 
 end
+
+
+
+# use doubapi v2 where json result was returned 
+def search_albums_of_v2 h
+
+  artist_chinese = h[:singer]
+  max=h[:max_result]||10
+  keywords= "%" + artist_chinese.each_byte.map {|c| c.to_s(16)}.join("%")
+	url="https://api.douban.com/v2/music/search?q=#{keywords}"
+ 	#uri="http://api.douban.com/music/subjects?tag=#{keywords}&start-index=1&max-results=#{max}"
+
+	puts "requeset url #{url}"
+	#issue http request 
+  doc = open(url, :proxy => nil, 'User-Agent' => 'ruby')
+
+	#parse result
+	albums = []
+	response = JSON.parse(File.read(doc))
+	response["musics"].each do |item|
+		#select only whose singer eqls artist_chinese
+		if item["attrs"]["singer"].include?(artist_chinese)
+			m = item["attrs"]
+			author = artist_chinese
+			title = m["title"].first
+			formated_release_day = m["pubdate"].first
+			link = mobile_site = item['mobile_link']
+			cover_thumnail = cover_big = item['image']
+			publisher = m['publisher']
+			rating = item['rating']['average']
+			tracks=[]
+			m['tracks'].first.split('\n').each do |t|
+				tracks << Doubapi::Track.new(t)
+			end
+
+  		albums << Doubapi::Album.new(author, title, formated_release_day, link, 
+																	 cover_thumnail,cover_big ,publisher,mobile_site,rating,
+																	tracks)
+		end 
+	end
+	[albums.size,albums]
+end
+
 
 
 #
