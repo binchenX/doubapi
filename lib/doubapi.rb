@@ -58,7 +58,8 @@ Event =  Struct.new :title, :when, :where, :what,:link,:poster_mobile,:bar_icon
 #release_date is in the format of YY-MM-DD
 Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:cover_big,:publisher,:mobile_site,:rating,:tracks
 
-Track = Struct.new :title,:url
+Track = Struct.new :title,:play_url
+
 
 
 #input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
@@ -199,34 +200,37 @@ end
 def search_albums_of_v2 h
 
   artist_chinese = h[:singer]
-  max=h[:max_result]||10
+	max=h[:max_result]||10
   keywords= "%" + artist_chinese.each_byte.map {|c| c.to_s(16)}.join("%")
 	url="https://api.douban.com/v2/music/search?q=#{keywords}"
  	#uri="http://api.douban.com/music/subjects?tag=#{keywords}&start-index=1&max-results=#{max}"
 
-	puts "requeset url #{url}"
+	puts "requeset url #{url}  #{artist_chinese}"
 	#issue http request 
   doc = open(url, :proxy => nil, 'User-Agent' => 'ruby')
 
 	#parse result
 	albums = []
-	response = JSON.parse(File.read(doc))
+	response = JSON.parse(doc.read)
+
 	response["musics"].each do |item|
 		#select only whose singer eqls artist_chinese
-		if item["attrs"]["singer"].include?(artist_chinese)
+		has_singer_attr =  !item["attrs"].nil? && !item["attrs"]["singer"].nil? 
+		if has_singer_attr && item["attrs"]["singer"].include?(artist_chinese)
 			m = item["attrs"]
 			author = artist_chinese
-			title = m["title"].first
-			formated_release_day = m["pubdate"].first
+			title = if m['title'].nil? then "unknown" else m["title"].first end
+			formated_release_day = if m['pubdate'].nil? then "unknown" else m["pubdate"].first end
 			link = mobile_site = item['mobile_link']
 			cover_thumnail = cover_big = item['image']
-			publisher = m['publisher'].first
+			publisher = if m['publisher'].nil? then "unknown" else m['publisher'].first end
 			rating = item['rating']['average']
 			tracks=[]
-			m['tracks'].first.split('\n').each_with_index do |t,index|
-				tracks << Doubapi::Track.new(t,nil)
+			if not m['tracks'].nil?
+				m['tracks'].first.split("\n").each_with_index do |t,index|
+					tracks << Doubapi::Track.new(t,nil)
+				end
 			end
-
   		albums << Doubapi::Album.new(author, title, formated_release_day, link, 
 																	 cover_thumnail,cover_big ,publisher,mobile_site,rating,
 																	tracks)

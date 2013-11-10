@@ -19,8 +19,14 @@ end
 
 def test2
   #author = "李志"
-  author = "窦唯"
-  total, albums = Doubapi.search_albums_of(:singer=>author,:since=>"1900-05",:max_result => 20) 
+  #author = "窦唯"
+
+	#authors = File.read("artists.txt").split("\n")
+
+	authors = ['汪峰']
+	authors.each do |author|
+	
+	total, albums = Doubapi.search_albums_of(:singer=>author,:since=>"1900-05",:max_result => 20) 
   
   #release date decending
   albums.sort {|a , b| b.release_date <=> a.release_date }.each do |album|
@@ -38,11 +44,13 @@ def test2
 			puts track.title
 		end
 
-		puts album.json
+		#puts album.json
   end
-  
+ 
+	end# each author
   #rating decending
-  
+ 
+=begin
   #release date decending
    albums.sort {|a , b| b.rating <=> a.rating }.each do |album|
      puts "-------------------------------"
@@ -56,6 +64,7 @@ def test2
      puts album.rating
    end
   puts "total #{total}"
+=end
 end 
 
 
