@@ -37,14 +37,28 @@ require 'json'
 #at_xpath  is to return single element and you know only there is only one element.
 #xpath is to return an array of elements
 
+class Struct
+def to_map
+    map = Hash.new
+    self.members.each { |m| map[m] = self[m] }
+    map
+end
+
+def to_json(*a)
+    to_map.to_json(*a)
+end
+
+def json
+    JSON.pretty_generate(self)
+end
+end
 module Doubapi
-#return a Nokogiri XML  object
-#use Douban API
 Event =  Struct.new :title, :when, :where, :what,:link,:poster_mobile,:bar_icon
+	
 #release_date is in the format of YY-MM-DD
 Album =  Struct.new :author, :title, :release_date, :link,:cover_thumbnail,:cover_big,:publisher,:mobile_site,:rating,:tracks
 
-Track = Struct.new :title
+Track = Struct.new :title,:url
 
 
 #input:{key => "all/singer_name", :location => "shanghai", :start_index => 16,:max_result => 15}
@@ -206,11 +220,11 @@ def search_albums_of_v2 h
 			formated_release_day = m["pubdate"].first
 			link = mobile_site = item['mobile_link']
 			cover_thumnail = cover_big = item['image']
-			publisher = m['publisher']
+			publisher = m['publisher'].first
 			rating = item['rating']['average']
 			tracks=[]
-			m['tracks'].first.split('\n').each do |t|
-				tracks << Doubapi::Track.new(t)
+			m['tracks'].first.split('\n').each_with_index do |t,index|
+				tracks << Doubapi::Track.new(t,nil)
 			end
 
   		albums << Doubapi::Album.new(author, title, formated_release_day, link, 

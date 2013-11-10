@@ -37,6 +37,8 @@ def test2
 		album.tracks.each do |track|
 			puts track.title
 		end
+
+		puts album.json
   end
   
   #rating decending
